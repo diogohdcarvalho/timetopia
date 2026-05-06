@@ -1,0 +1,1005 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Timetopia">
+<meta name="theme-color" content="#1a1a2e">
+<title>Timetopia</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --brand:#6C63FF;--brand-light:#EEECFF;--brand-dark:#1a1a2e;
+  --social:#2ECC9A;--social-light:#E0FAF3;--social-dark:#0A3D2E;
+  --talent:#FF7B54;--talent-light:#FFF0EB;--talent-dark:#4A1800;
+  --gold:#C49A2A;--gold-light:#FDF5DC;
+  --danger:#E24B4A;--danger-light:#FCEBEB;
+  --s:#fff;--s2:#f7f7fb;--b:rgba(0,0,0,.09);--b2:rgba(0,0,0,.15);
+  --t:#111;--t2:#666;--t3:#aaa;--r:16px;
+  --safe-top:env(safe-area-inset-top,0px);
+  --safe-bot:env(safe-area-inset-bottom,0px)
+}
+html,body{height:100%;background:#f7f7fb;font-family:'Outfit',sans-serif;overflow:hidden}
+#app{display:flex;flex-direction:column;height:100%;max-width:430px;margin:0 auto;background:#f7f7fb;position:relative;overflow:hidden}
+.screen{display:none;flex-direction:column;flex:1;overflow:hidden}
+.screen.on{display:flex}
+.statusbar{height:calc(var(--safe-top) + 6px);background:var(--brand-dark);flex-shrink:0}
+
+/* TOPBAR */
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;background:#fff;border-bottom:0.5px solid var(--b);flex-shrink:0}
+.logo{font-family:'Playfair Display',serif;font-size:20px;color:var(--brand-dark)}
+.logo em{color:var(--brand);font-style:italic}
+.topbar-right{display:flex;align-items:center;gap:8px}
+.verify-pill{display:flex;align-items:center;gap:4px;padding:4px 9px;border-radius:20px;font-size:11px;cursor:pointer;border:0.5px solid}
+.verify-pill.verified{background:var(--brand-light);border-color:var(--brand);color:var(--brand-dark)}
+.tok-chip{display:flex;align-items:center;gap:4px;background:var(--gold-light);border:0.5px solid var(--gold);border-radius:20px;padding:4px 10px;cursor:pointer}
+.tok-chip span{font-size:13px;font-weight:500;color:var(--gold)}
+.tok-chip .tok-icon{font-size:13px}
+
+.scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:14px 14px 20px}
+
+/* BOTTOM NAV */
+.bottom-nav{display:flex;background:#fff;border-top:0.5px solid var(--b);flex-shrink:0;padding-bottom:var(--safe-bot)}
+.bn{flex:1;display:flex;flex-direction:column;align-items:center;padding:9px 4px 6px;cursor:pointer;position:relative}
+.bn svg{width:22px;height:22px;stroke:var(--t3);fill:none;stroke-width:1.5;margin-bottom:3px;transition:stroke .15s}
+.bn span{font-size:10px;color:var(--t3);transition:color .15s}
+.bn.on svg{stroke:var(--brand)}
+.bn.on span{color:var(--brand)}
+.bn-dot{position:absolute;top:7px;right:calc(50% - 14px);width:7px;height:7px;background:var(--danger);border-radius:50%;border:1.5px solid #fff}
+
+/* HERO */
+.hero{background:linear-gradient(135deg,#1a1a2e 0%,#16213e 60%,#0f3460 100%);border-radius:var(--r);padding:18px;margin-bottom:14px}
+.hero-top{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.hero-photo{width:54px;height:54px;border-radius:50%;object-fit:cover;border:2px solid rgba(255,255,255,.2);flex-shrink:0;background:#333;display:flex;align-items:center;justify-content:center;font-size:20px;color:#fff;overflow:hidden}
+.hero-photo img{width:100%;height:100%;object-fit:cover}
+.hero-info .hero-name{font-family:'Playfair Display',serif;font-size:18px;color:#fff}
+.hero-info .hero-age{font-size:11px;color:rgba(255,255,255,.45);margin-top:1px}
+.hero-info .hero-loc{font-size:11px;color:rgba(255,255,255,.4);margin-top:2px;display:flex;align-items:center;gap:3px}
+.trust-box{background:rgba(255,255,255,.08);border-radius:10px;padding:7px 11px;text-align:center;margin-left:auto;flex-shrink:0}
+.trust-val{font-size:19px;font-weight:400;color:#a89cff}
+.trust-lbl{font-size:9px;color:rgba(255,255,255,.35)}
+.bal-row{display:flex;align-items:baseline;gap:6px;margin-bottom:12px}
+.bal-num{font-size:38px;font-weight:300;color:#a89cff;line-height:1}
+.bal-unit{font-size:12px;color:rgba(255,255,255,.4)}
+.hero-stats{display:flex;gap:18px}
+.hs span{font-size:10px;color:rgba(255,255,255,.38);display:block}
+.hs strong{font-size:14px;font-weight:500;color:#fff}
+
+/* SECTION LABEL */
+.slabel{font-size:10px;color:var(--t2);text-transform:uppercase;letter-spacing:.1em;margin-bottom:9px;font-weight:500}
+
+/* CHIPS */
+.chips{display:flex;gap:7px;overflow-x:auto;padding-bottom:2px;margin-bottom:14px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{padding:6px 14px;border-radius:20px;font-size:12px;cursor:pointer;border:0.5px solid var(--b);background:var(--s2);color:var(--t2);white-space:nowrap;flex-shrink:0;transition:all .15s;-webkit-user-select:none}
+.chip.on{border-color:var(--brand);background:var(--brand-light);color:var(--brand-dark)}
+.chip.s-on{border-color:var(--social);background:var(--social-light);color:var(--social-dark)}
+.chip.t-on{border-color:var(--talent);background:var(--talent-light);color:var(--talent-dark)}
+
+/* CARDS */
+.cards{display:flex;flex-direction:column;gap:10px}
+.card{background:var(--s);border:0.5px solid var(--b);border-radius:var(--r);padding:13px 14px;cursor:pointer;-webkit-user-select:none;transition:transform .1s}
+.card:active{transform:scale(.98)}
+.card-top{display:flex;gap:11px}
+.av{border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:500;font-family:'Outfit',sans-serif;flex-shrink:0;overflow:hidden}
+.av img{width:100%;height:100%;object-fit:cover}
+.card-body{flex:1;min-width:0}
+.c-title{font-size:14px;font-weight:500;color:var(--t);margin-bottom:2px;line-height:1.3}
+.c-who{font-size:11px;color:var(--t2);margin-bottom:5px;display:flex;align-items:center;gap:5px}
+.c-desc{font-size:12px;color:var(--t2);line-height:1.45;margin-bottom:7px}
+.c-footer{display:flex;align-items:center;gap:5px;flex-wrap:wrap}
+.type-tag{font-size:10px;padding:2px 7px;border-radius:4px;font-weight:500}
+.ts{background:var(--social-light);color:var(--social-dark);border:0.5px solid #7DE8C8}
+.tt{background:var(--talent-light);color:var(--talent-dark);border:0.5px solid #FFB899}
+.cat-tag{font-size:10px;padding:2px 7px;border-radius:4px;background:var(--s2);border:0.5px solid var(--b);color:var(--t2)}
+.sens-tag{font-size:10px;padding:2px 7px;border-radius:4px;background:#FDF5DC;border:0.5px solid #E8C84A;color:#7A5A00}
+.price-right{margin-left:auto;display:flex;align-items:center;gap:3px}
+.pv{font-size:13px;font-weight:500;color:var(--gold)}
+.pu{font-size:10px;color:var(--t3)}
+.card-bot{display:flex;align-items:center;gap:5px;margin-top:9px;padding-top:9px;border-top:0.5px solid var(--b);flex-wrap:wrap}
+.stars{display:flex;gap:2px}
+.rt{font-size:11px;color:var(--t3)}
+.vbadge{font-size:10px;padding:2px 7px;border-radius:4px;margin-left:auto}
+.vbadge.ok{background:var(--brand-light);color:var(--brand-dark);border:0.5px solid var(--brand)}
+.vbadge.no{background:var(--danger-light);color:var(--danger);border:0.5px solid var(--danger)}
+.v-ring{border:2px solid var(--brand)}
+.nv-ring{border:2px solid var(--b2)}
+
+/* PEDIR AJUDA SECTION */
+.help-card{background:var(--s);border:0.5px solid var(--b);border-radius:var(--r);padding:13px 14px;margin-bottom:10px;cursor:pointer;transition:transform .1s}
+.help-card:active{transform:scale(.98)}
+.help-card-top{display:flex;gap:10px;align-items:flex-start;margin-bottom:8px}
+.help-title{font-size:14px;font-weight:500;color:var(--t);margin-bottom:3px}
+.help-desc{font-size:12px;color:var(--t2);line-height:1.45}
+.help-footer{display:flex;align-items:center;gap:6px}
+.help-offer{display:flex;align-items:center;gap:3px;background:var(--gold-light);border:0.5px solid var(--gold);border-radius:20px;padding:3px 9px}
+.help-offer span{font-size:12px;font-weight:500;color:var(--gold)}
+.help-loc{font-size:11px;color:var(--t3);display:flex;align-items:center;gap:3px}
+
+/* REQUEST FORM */
+.req-panel{background:var(--s);border:0.5px solid var(--b);border-radius:var(--r);padding:13px 14px;margin-bottom:14px}
+.req-panel textarea{width:100%;padding:10px 12px;font-size:14px;font-family:inherit;border:0.5px solid var(--b);border-radius:8px;background:var(--s2);color:var(--t);resize:none;height:80px;outline:none;margin-bottom:9px}
+.req-row{display:flex;gap:7px;margin-bottom:9px}
+.req-row select,.req-row input{flex:1;padding:9px 12px;font-size:13px;font-family:inherit;border:0.5px solid var(--b);border-radius:8px;background:var(--s2);color:var(--t);outline:none}
+.req-btn{width:100%;padding:12px;border-radius:9px;font-size:14px;font-weight:500;font-family:inherit;cursor:pointer;border:none;background:var(--brand);color:#fff;transition:opacity .15s}
+.req-btn:active{opacity:.85}
+
+/* MESSAGES */
+.msg-item{background:var(--s);border:0.5px solid var(--b);border-radius:var(--r);padding:12px 13px;cursor:pointer;margin-bottom:9px;transition:transform .1s}
+.msg-item:active{transform:scale(.98)}
+.msg-item.unread{border-left:3px solid var(--brand)}
+.msg-hdr{display:flex;align-items:center;gap:9px;margin-bottom:5px}
+.msg-name{font-size:13px;font-weight:500;color:var(--t)}
+.msg-time{font-size:10px;color:var(--t3);margin-left:auto}
+.msg-prev{font-size:12px;color:var(--t2);line-height:1.4}
+.udot{width:8px;height:8px;background:var(--brand);border-radius:50%;flex-shrink:0}
+
+/* CHAT */
+.chat-hdr{display:flex;align-items:center;gap:9px;padding:10px 14px;background:#fff;border-bottom:0.5px solid var(--b);flex-shrink:0}
+.back-btn{width:30px;height:30px;border-radius:50%;background:var(--s2);border:0.5px solid var(--b);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0}
+.cn{font-size:13px;font-weight:500;color:var(--t)}
+.cs{font-size:10px;color:var(--t3)}
+.bubbles{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:14px;display:flex;flex-direction:column;gap:8px}
+.bub{max-width:75%;padding:9px 12px;border-radius:12px;font-size:13px;line-height:1.45}
+.bub.them{background:var(--s2);color:var(--t);align-self:flex-start;border-radius:4px 12px 12px 12px}
+.bub.me{background:var(--brand-dark);color:#c8c3ff;align-self:flex-end;border-radius:12px 4px 12px 12px}
+.bub-t{font-size:10px;margin-top:3px;opacity:.5;padding:0 3px}
+.chat-input-bar{display:flex;align-items:center;gap:8px;padding:10px 14px;background:#fff;border-top:0.5px solid var(--b);flex-shrink:0;padding-bottom:calc(10px + var(--safe-bot))}
+.chat-input-bar input{flex:1;padding:9px 14px;font-size:14px;border-radius:20px;border:0.5px solid var(--b);background:var(--s2);color:var(--t);font-family:inherit;outline:none}
+.send-btn{width:36px;height:36px;background:var(--brand);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;border:none}
+.send-btn svg{width:14px;height:14px;fill:#fff}
+
+/* WALLET */
+.wallet-card{background:linear-gradient(135deg,#1a1a2e,#0f3460);border-radius:var(--r);padding:18px;margin-bottom:14px}
+.w-lbl{font-size:10px;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.1em;margin-bottom:4px}
+.w-big{font-family:'Playfair Display',serif;font-size:44px;color:#a89cff;line-height:1}
+.w-sub{font-size:12px;color:rgba(255,255,255,.4);margin-bottom:14px}
+.w-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.wc{background:rgba(255,255,255,.07);border-radius:8px;padding:10px}
+.wc span{font-size:10px;color:rgba(255,255,255,.4);display:block;margin-bottom:2px}
+.wc strong{font-size:16px;font-weight:500}
+.tx{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--s);border:0.5px solid var(--b);border-radius:10px;margin-bottom:7px}
+.tx-ico{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.tx-ico svg{width:13px;height:13px}
+.txb{flex:1}.txt{font-size:12px;font-weight:500;color:var(--t)}.txs{font-size:10px;color:var(--t3)}
+.txa{font-size:14px;font-weight:500}
+.txa.cr{color:var(--social)}.txa.db{color:var(--danger)}
+
+/* PROFILE */
+.profile-cover{background:linear-gradient(135deg,#1a1a2e,#0f3460);border-radius:var(--r);padding:20px;margin-bottom:14px;display:flex;flex-direction:column;align-items:center}
+.prof-photo-wrap{position:relative;margin-bottom:10px}
+.prof-photo{width:80px;height:80px;border-radius:50%;border:3px solid rgba(255,255,255,.25);overflow:hidden;background:#333;display:flex;align-items:center;justify-content:center;cursor:pointer}
+.prof-photo img{width:100%;height:100%;object-fit:cover}
+.photo-edit-btn{position:absolute;bottom:0;right:0;width:24px;height:24px;background:var(--brand);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;border:2px solid #fff}
+.photo-edit-btn svg{width:11px;height:11px;fill:#fff}
+.prof-name{font-family:'Playfair Display',serif;font-size:20px;color:#fff;margin-bottom:2px;text-align:center}
+.prof-age{font-size:12px;color:rgba(255,255,255,.45);text-align:center;margin-bottom:4px}
+.prof-loc{font-size:11px;color:rgba(255,255,255,.38);text-align:center;margin-bottom:10px}
+.pid{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:20px;font-size:11px;background:rgba(255,255,255,.1);border:0.5px solid rgba(255,255,255,.2);color:rgba(255,255,255,.7)}
+.pstats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px}
+.psc{background:var(--s);border-radius:10px;padding:11px;text-align:center;border:0.5px solid var(--b)}
+.psc strong{display:block;font-size:18px;font-weight:500;color:var(--t)}
+.psc span{font-size:10px;color:var(--t2)}
+
+/* VERIFY */
+.vpanel{background:var(--s);border:0.5px solid var(--b);border-radius:var(--r);padding:13px 14px;margin-bottom:14px}
+.vstep{display:flex;align-items:center;gap:10px;padding:10px 11px;border-radius:8px;border:0.5px solid var(--b);background:var(--s2);cursor:pointer;margin-bottom:7px;transition:border-color .15s}
+.vstep:active{transform:scale(.98)}
+.vstep.done{border-color:var(--brand);background:var(--brand-light)}
+.vs-ico{width:30px;height:30px;border-radius:50%;background:var(--s);border:0.5px solid var(--b);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.vstep.done .vs-ico{background:var(--brand);border-color:var(--brand)}
+.vs-ico svg{width:13px;height:13px}
+.vs-t{font-size:12px;font-weight:500;color:var(--t)}
+.vs-s{font-size:10px;color:var(--t2)}
+.vs-chk{margin-left:auto;width:16px;height:16px;border-radius:50%;background:var(--brand);display:none;align-items:center;justify-content:center;flex-shrink:0}
+.vstep.done .vs-chk{display:flex}
+.vs-chk svg{width:9px;height:9px;fill:#fff}
+
+.skill-pills{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
+.sp{padding:4px 11px;border-radius:20px;font-size:11px}
+.sp.s{background:var(--social-light);color:var(--social-dark);border:0.5px solid #7DE8C8}
+.sp.t{background:var(--talent-light);color:var(--talent-dark);border:0.5px solid #FFB899}
+
+/* PUBLISH */
+.pub-panel{background:var(--s);border:0.5px solid var(--b);border-radius:var(--r);padding:13px 14px}
+.ptype-row{display:flex;gap:7px;margin-bottom:11px}
+.ptbtn{flex:1;padding:9px;border-radius:8px;font-size:12px;font-weight:500;cursor:pointer;border:1.5px solid var(--b);background:var(--s2);color:var(--t2);font-family:inherit;transition:all .15s}
+.ptbtn.ss{border-color:var(--social);background:var(--social-light);color:var(--social-dark)}
+.ptbtn.ts{border-color:var(--talent);background:var(--talent-light);color:var(--talent-dark)}
+.pinput{width:100%;padding:9px 12px;font-size:14px;font-family:inherit;border:0.5px solid var(--b);border-radius:8px;background:var(--s2);color:var(--t);margin-bottom:9px;outline:none}
+.prow{display:flex;gap:7px;margin-bottom:9px}
+.prow select{flex:1;padding:9px 12px;font-size:13px;font-family:inherit;border:0.5px solid var(--b);border-radius:8px;background:var(--s2);color:var(--t);outline:none}
+.sens-toggle{display:flex;align-items:center;gap:8px;padding:9px 11px;border-radius:8px;background:#FDF5DC;border:0.5px solid #E8C84A;margin-bottom:11px;cursor:pointer}
+.tg{width:34px;height:19px;border-radius:10px;background:var(--b2);position:relative;transition:background .2s;flex-shrink:0}
+.tg.on{background:var(--gold)}
+.tk{width:15px;height:15px;border-radius:50%;background:#fff;position:absolute;top:2px;left:2px;transition:left .2s}
+.tg.on .tk{left:17px}
+.sens-toggle span{font-size:11px;color:#7A5A00;flex:1;line-height:1.4}
+.pub-btn{width:100%;padding:12px;border-radius:9px;font-size:14px;font-weight:500;font-family:inherit;cursor:pointer;border:none;transition:opacity .15s}
+.pub-btn:active{opacity:.85}
+.pub-btn.sb{background:var(--social);color:#fff}
+.pub-btn.tb{background:var(--talent);color:#fff}
+
+/* MODAL */
+.modal-overlay{display:none;position:absolute;inset:0;background:rgba(0,0,0,.5);z-index:100;align-items:flex-end}
+.modal-overlay.on{display:flex}
+.modal{background:var(--s);border-radius:20px 20px 0 0;padding:18px 16px calc(18px + var(--safe-bot));width:100%;max-height:92%;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.drag{width:34px;height:4px;background:var(--b2);border-radius:2px;margin:0 auto 14px}
+.m-title{font-family:'Playfair Display',serif;font-size:18px;color:var(--t);margin-bottom:4px}
+.m-sub{font-size:12px;color:var(--t2);margin-bottom:13px;line-height:1.5}
+.m-cost{display:flex;justify-content:space-between;align-items:center;padding:11px 13px;background:var(--gold-light);border-radius:8px;margin-bottom:9px}
+.m-cost span{font-size:12px;color:var(--gold)}
+.m-cost strong{font-size:17px;color:var(--gold)}
+.sens-warn{display:flex;gap:9px;align-items:flex-start;padding:10px 11px;background:#FDF5DC;border-radius:8px;border:0.5px solid #E8C84A;margin-bottom:9px}
+.sens-warn svg{width:15px;height:15px;flex-shrink:0;margin-top:2px}
+.sens-warn p{font-size:11px;color:#7A5A00;line-height:1.5}
+.m-bal{font-size:11px;color:var(--t3);text-align:center;margin-bottom:13px}
+.mbtn{width:100%;padding:13px;border-radius:10px;font-size:14px;font-weight:500;font-family:inherit;cursor:pointer;border:none;margin-bottom:8px;transition:opacity .15s}
+.mbtn:active{opacity:.85}
+.mbtn.green{background:var(--brand);color:#fff}
+.mbtn.gray{background:var(--s2);color:var(--t);border:0.5px solid var(--b)}
+
+/* RATE */
+.rate-stars-row{display:flex;gap:10px;justify-content:center;margin:14px 0}
+.rstar{width:36px;height:36px;cursor:pointer;transition:transform .1s}
+.rstar:active{transform:scale(.9)}
+.rstar path{fill:var(--b2);transition:fill .1s}
+.rstar.on path{fill:var(--gold)}
+.rate-area{width:100%;padding:9px 12px;font-size:14px;font-family:inherit;border:0.5px solid var(--b);border-radius:8px;background:var(--s2);color:var(--t);resize:none;height:70px;margin-bottom:12px;outline:none}
+
+/* PHOTO UPLOAD */
+.photo-input{display:none}
+.photo-preview-row{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+
+/* LOGIN */
+.login-scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:30px 22px calc(30px + var(--safe-bot))}
+.login-logo{font-family:'Playfair Display',serif;font-size:30px;color:var(--brand-dark);text-align:center;margin-bottom:4px}
+.login-logo em{color:var(--brand);font-style:italic}
+.login-tagline{text-align:center;font-size:13px;color:var(--t2);margin-bottom:26px;line-height:1.7}
+.geo-note{display:flex;align-items:flex-start;gap:8px;padding:10px 12px;background:var(--brand-light);border-radius:10px;border:0.5px solid var(--brand);margin-bottom:20px}
+.geo-note svg{width:14px;height:14px;flex-shrink:0;margin-top:2px;stroke:var(--brand)}
+.geo-note span{font-size:11px;color:var(--brand-dark);line-height:1.5}
+.lbtn{width:100%;padding:13px;border-radius:12px;font-size:14px;font-weight:500;font-family:inherit;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:9px;border:0.5px solid var(--b);background:var(--s);color:var(--t);margin-bottom:9px;transition:background .15s;-webkit-user-select:none}
+.lbtn:active{background:var(--s2)}
+.lbtn svg{width:18px;height:18px;flex-shrink:0}
+.lbtn.primary{background:var(--brand);border-color:var(--brand);color:#fff}
+.divider{text-align:center;font-size:11px;color:var(--t3);margin:4px 0 12px;position:relative}
+.divider::before,.divider::after{content:'';position:absolute;top:50%;width:40%;height:0.5px;background:var(--b)}
+.divider::before{left:0}.divider::after{right:0}
+.lfields{display:flex;flex-direction:column;gap:8px;margin-bottom:12px}
+.lfields input{padding:12px 14px;font-size:14px;border:0.5px solid var(--b);border-radius:9px;background:var(--s2);color:var(--t);font-family:inherit;outline:none;width:100%}
+
+.toast{position:absolute;bottom:calc(80px + var(--safe-bot));left:50%;transform:translateX(-50%) translateY(20px);background:rgba(26,26,46,.95);color:#c8c3ff;border-radius:20px;padding:9px 18px;font-size:13px;white-space:nowrap;opacity:0;transition:opacity .25s,transform .25s;z-index:200;pointer-events:none}
+.toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+</style>
+</head>
+<body>
+<div id="app">
+
+<!-- LOGIN -->
+<div id="login-screen" class="screen on">
+  <div class="statusbar"></div>
+  <div class="login-scroll">
+    <div style="height:10px"></div>
+    <div style="text-align:center;margin-bottom:16px">
+      <div style="width:64px;height:64px;background:var(--brand);border-radius:18px;display:inline-flex;align-items:center;justify-content:center;margin-bottom:8px">
+        <svg width="32" height="32" viewBox="0 0 32 32" fill="none"><circle cx="16" cy="16" r="12" stroke="white" stroke-width="1.5"/><path d="M16 8v8l5 3" stroke="white" stroke-width="1.8" stroke-linecap="round"/></svg>
+      </div>
+    </div>
+    <div class="login-logo"><em>Timetopia</em></div>
+    <p class="login-tagline">Partilha o teu tempo.<br>Troca horas por experiências, ajuda e talentos.</p>
+    <div class="geo-note">
+      <svg viewBox="0 0 14 14" fill="none" stroke-width="1.5"><circle cx="7" cy="5.5" r="2.5"/><path d="M7 9c0 0-5 3.5-5 3.5s1.5-4 5-4 5 4 5 4-5-3.5-5-3.5z" fill="none"/></svg>
+      <span>Usamos a tua localização para mostrar serviços e pedidos perto de ti.</span>
+    </div>
+    <button class="lbtn" onclick="doLogin()">
+      <svg viewBox="0 0 18 18"><path d="M17.64 9.2a10.34 10.34 0 00-.16-1.84H9v3.48h4.84a4.14 4.14 0 01-1.8 2.72v2.26h2.92c1.7-1.57 2.68-3.88 2.68-6.62z" fill="#4285F4"/><path d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.92-2.26c-.8.54-1.83.86-3.04.86-2.34 0-4.32-1.58-5.03-3.71H.9v2.33A9 9 0 009 18z" fill="#34A853"/><path d="M3.97 10.71A5.41 5.41 0 013.69 9c0-.59.1-1.17.28-1.71V4.96H.9A9 9 0 000 9c0 1.45.35 2.82.9 4.04l3.07-2.33z" fill="#FBBC05"/><path d="M9 3.58c1.32 0 2.5.45 3.44 1.34l2.58-2.58C13.46.89 11.43 0 9 0A9 9 0 00.9 4.96L3.97 7.3C4.68 5.17 6.66 3.58 9 3.58z" fill="#EA4335"/></svg>
+      Continuar com Google
+    </button>
+    <button class="lbtn" onclick="doLogin()">
+      <svg viewBox="0 0 18 18" fill="var(--t)"><path d="M14.94 15.67c-.65.95-1.32 1.9-2.38 1.92-1.04.02-1.38-.62-2.57-.62-1.2 0-1.57.6-2.55.64-1.02.04-1.8-1.02-2.46-1.97C3.65 13.2 2.9 10.03 4.05 7.9c.58-1.05 1.63-1.71 2.77-1.73 1.09-.02 2.12.73 2.79.73.66 0 1.9-.9 3.2-.77.55.02 2.08.22 3.07 1.67-.08.05-1.83 1.07-1.81 3.19.02 2.52 2.21 3.36 2.24 3.38-.03.07-.35 1.19-1.37 2.3zM10.5.5c.07 1.85-.68 3.69-1.8 4.74-.47.43-1.44.83-2.44.75-.13-1.78.65-3.6 1.73-4.63C8.56.87 9.55.44 10.5.5z"/></svg>
+      Continuar com Apple
+    </button>
+    <button class="lbtn" onclick="doLogin()">
+      <svg viewBox="0 0 18 18" fill="none" stroke="var(--t)" stroke-width="1.4"><rect x="2" y="4" width="14" height="10" rx="2"/><path d="M6 8h6M6 11h4"/></svg>
+      Entrar com telemóvel (SMS)
+    </button>
+    <div class="divider">ou usa email</div>
+    <div class="lfields">
+      <input type="email" placeholder="Email" autocomplete="email">
+      <input type="password" placeholder="Palavra-passe" autocomplete="current-password">
+    </div>
+    <button class="lbtn primary" onclick="doLogin()">Entrar</button>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div id="main-screen" class="screen">
+  <div class="statusbar"></div>
+  <div class="topbar">
+    <div class="logo"><em>Timetopia</em></div>
+    <div class="topbar-right">
+      <div class="verify-pill verified" onclick="showTab('perfil')">
+        <svg width="9" height="9" viewBox="0 0 9 9" fill="none" stroke="var(--brand)" stroke-width="1.5"><path d="M1.5 4.5l2 2 4-4"/></svg>
+        ID verificado
+      </div>
+      <div class="tok-chip" onclick="showTab('carteira')">
+        <span class="tok-icon">✦</span>
+        <span id="bal-badge">8</span>
+        <span style="font-size:11px;color:var(--gold)">topia</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- EXPLORAR -->
+  <div id="tab-explorar" class="scroll" style="display:block">
+    <div class="hero">
+      <div class="hero-top">
+        <div class="hero-photo" id="hero-photo-el">
+          <svg width="28" height="28" viewBox="0 0 28 28" fill="none" stroke="rgba(255,255,255,.5)" stroke-width="1.5"><circle cx="14" cy="10" r="5"/><path d="M4 24c0-5.5 4.5-10 10-10s10 4.5 10 10"/></svg>
+        </div>
+        <div class="hero-info">
+          <div class="hero-name">Diogo Carvalho</div>
+          <div class="hero-age">35 anos · Lisboa</div>
+          <div class="hero-loc">
+            <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="rgba(255,255,255,.4)" stroke-width="1.3"><circle cx="5" cy="4" r="2"/><path d="M5 9S1.5 6 1.5 4a3.5 3.5 0 017 0C8.5 6 5 9 5 9z"/></svg>
+            Mouraria, Lisboa
+          </div>
+        </div>
+        <div class="trust-box">
+          <div class="trust-val">96</div>
+          <div class="trust-lbl">trust score</div>
+        </div>
+      </div>
+      <div class="bal-row">
+        <span class="bal-num" id="hero-bal">8</span>
+        <span class="bal-unit">✦ topia disponíveis</span>
+      </div>
+      <div class="hero-stats">
+        <div class="hs"><span>partilhadas</span><strong>14 h</strong></div>
+        <div class="hs"><span>recebidas</span><strong>9 h</strong></div>
+        <div class="hs"><span>avaliação</span><strong>4.9 ★</strong></div>
+      </div>
+    </div>
+
+    <div class="chips">
+      <div class="chip on" onclick="setChip(this,'all')">Todos</div>
+      <div class="chip" onclick="setChip(this,'talent')">Talentos</div>
+      <div class="chip" onclick="setChip(this,'social')">Social</div>
+      <div class="chip" onclick="setChip(this,'perto')">Perto de mim</div>
+      <div class="chip" onclick="setChip(this,'sensivel')">Sensíveis</div>
+    </div>
+
+    <div class="slabel">Disponíveis agora</div>
+    <div class="cards" id="cards-wrap"></div>
+  </div>
+
+  <!-- PEDIR AJUDA -->
+  <div id="tab-pedir" class="scroll" style="display:none">
+    <div class="slabel">Publicar pedido</div>
+    <div class="req-panel">
+      <textarea id="req-desc" placeholder="Descreve o que precisas de ajuda... ex: preciso de alguém para me ajudar a montar uma estante IKEA este sábado de manhã."></textarea>
+      <div class="req-row">
+        <select id="req-cat">
+          <option value="casa">Casa &amp; bricolage</option>
+          <option value="compras">Compras &amp; recados</option>
+          <option value="transporte">Transporte</option>
+          <option value="tech">Tecnologia</option>
+          <option value="cuidado">Cuidado &amp; companhia</option>
+          <option value="outro">Outro</option>
+        </select>
+        <select id="req-offer">
+          <option value="1">Ofereço 1 ✦</option>
+          <option value="2">Ofereço 2 ✦</option>
+          <option value="3">Ofereço 3 ✦</option>
+        </select>
+      </div>
+      <button class="req-btn" onclick="postRequest()">Publicar pedido</button>
+    </div>
+
+    <div class="slabel">Pedidos da comunidade</div>
+    <div id="help-list"></div>
+  </div>
+
+  <!-- MENSAGENS -->
+  <div id="tab-mensagens" style="display:none;flex-direction:column;flex:1;overflow:hidden">
+    <div id="msg-list-view" class="scroll">
+      <div class="slabel">Conversas</div>
+      <div id="msg-list"></div>
+    </div>
+    <div id="chat-view" style="display:none;flex-direction:column;flex:1;overflow:hidden">
+      <div class="chat-hdr">
+        <div class="back-btn" onclick="backMsgs()"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="var(--t)" stroke-width="1.8"><path d="M8 2L4 6l4 4"/></svg></div>
+        <div class="av v-ring" id="chat-av" style="width:32px;height:32px;font-size:12px"></div>
+        <div>
+          <div class="cn" id="chat-name"></div>
+          <div class="cs" id="chat-status"></div>
+        </div>
+      </div>
+      <div class="bubbles" id="chat-bubbles"></div>
+      <div class="chat-input-bar">
+        <input type="text" placeholder="Mensagem..." id="chat-inp" onkeydown="if(event.key==='Enter')sendMsg()">
+        <div class="send-btn" onclick="sendMsg()"><svg viewBox="0 0 14 14"><path d="M1 7l11-5-5 11-1.5-4.5L1 7z"/></svg></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CARTEIRA -->
+  <div id="tab-carteira" class="scroll" style="display:none">
+    <div class="wallet-card">
+      <div class="w-lbl">saldo total</div>
+      <div style="display:flex;align-items:baseline;gap:8px;margin-bottom:4px">
+        <div class="w-big" id="wallet-big">8</div>
+        <div style="font-size:16px;color:#a89cff">✦</div>
+      </div>
+      <div class="w-sub">topia — tokens de tempo</div>
+      <div class="w-grid">
+        <div class="wc"><span>ganhos este mês</span><strong style="color:#7DE8C8">+4 ✦</strong></div>
+        <div class="wc"><span>gastos este mês</span><strong style="color:#F09595">-2 ✦</strong></div>
+      </div>
+    </div>
+    <div class="slabel">Histórico</div>
+    <div id="tx-list"></div>
+  </div>
+
+  <!-- PERFIL -->
+  <div id="tab-perfil" class="scroll" style="display:none">
+    <div class="profile-cover">
+      <div class="prof-photo-wrap">
+        <div class="prof-photo" id="prof-photo-el" onclick="document.getElementById('photo-input').click()">
+          <svg width="36" height="36" viewBox="0 0 36 36" fill="none" stroke="rgba(255,255,255,.4)" stroke-width="1.5"><circle cx="18" cy="13" r="6"/><path d="M5 32c0-7 5.8-13 13-13s13 6 13 13"/></svg>
+        </div>
+        <div class="photo-edit-btn" onclick="document.getElementById('photo-input').click()">
+          <svg viewBox="0 0 11 11"><path d="M2 8l5.5-5.5 2 2L4 10H2V8z" fill="white"/><path d="M7 2l2 2" stroke="white" stroke-width="1" fill="none"/></svg>
+        </div>
+        <input type="file" id="photo-input" class="photo-input" accept="image/*" onchange="handlePhoto(event)">
+      </div>
+      <div class="prof-name">Diogo Carvalho</div>
+      <div class="prof-age">35 anos</div>
+      <div class="prof-loc">📍 Mouraria, Lisboa · membro há 2 meses</div>
+      <div class="pid">
+        <svg width="9" height="9" viewBox="0 0 9 9" fill="none" stroke="rgba(255,255,255,.7)" stroke-width="1.5"><path d="M1.5 4.5l2 2 4-4"/></svg>
+        ID verificado · #TT2847
+      </div>
+    </div>
+
+    <div class="pstats">
+      <div class="psc"><strong>14</strong><span>horas partilhadas</span></div>
+      <div class="psc"><strong>9</strong><span>horas recebidas</span></div>
+      <div class="psc"><strong>4.9</strong><span>avaliação</span></div>
+    </div>
+
+    <div class="slabel">Verificação de identidade</div>
+    <div class="vpanel">
+      <div style="font-size:12px;color:var(--t);margin-bottom:3px;font-weight:500">Nível de confiança: <span style="color:var(--brand)">96/100</span></div>
+      <div style="font-size:11px;color:var(--t2);margin-bottom:11px;line-height:1.4">Obrigatória para serviços sensíveis.</div>
+      <div class="vstep done" onclick="vstepTap(this)">
+        <div class="vs-ico"><svg viewBox="0 0 13 13" fill="none" stroke="#fff" stroke-width="1.4"><rect x="2" y="2" width="9" height="9" rx="1"/><path d="M4.5 6h4M4.5 8h2.5"/></svg></div>
+        <div><div class="vs-t">Email confirmado</div><div class="vs-s">diogo@exemplo.pt</div></div>
+        <div class="vs-chk"><svg viewBox="0 0 9 9"><path d="M1.5 4.5l2 2 4-4" stroke="#fff" stroke-width="1.4" fill="none"/></svg></div>
+      </div>
+      <div class="vstep done" onclick="vstepTap(this)">
+        <div class="vs-ico"><svg viewBox="0 0 13 13" fill="none" stroke="#fff" stroke-width="1.4"><rect x="2.5" y="1.5" width="8" height="10" rx="1"/><circle cx="6.5" cy="5" r="1.5"/><path d="M3.5 9c0-1.1 1.3-2 3-2s3 .9 3 2"/></svg></div>
+        <div><div class="vs-t">Documento de identidade</div><div class="vs-s">CC verificado</div></div>
+        <div class="vs-chk"><svg viewBox="0 0 9 9"><path d="M1.5 4.5l2 2 4-4" stroke="#fff" stroke-width="1.4" fill="none"/></svg></div>
+      </div>
+      <div class="vstep done" onclick="vstepTap(this)">
+        <div class="vs-ico"><svg viewBox="0 0 13 13" fill="none" stroke="#fff" stroke-width="1.4"><circle cx="6.5" cy="5" r="2.5"/><path d="M1 12c0-3 2.5-5 5.5-5s5.5 2 5.5 5"/></svg></div>
+        <div><div class="vs-t">Selfie de confirmação</div><div class="vs-s">Foto validada</div></div>
+        <div class="vs-chk"><svg viewBox="0 0 9 9"><path d="M1.5 4.5l2 2 4-4" stroke="#fff" stroke-width="1.4" fill="none"/></svg></div>
+      </div>
+      <div class="vstep" onclick="vstepTap(this)">
+        <div class="vs-ico"><svg viewBox="0 0 13 13" fill="none" stroke="var(--t2)" stroke-width="1.4"><circle cx="4" cy="5" r="2"/><path d="M1 10c0-1.7 1.3-3 3-3"/><circle cx="9" cy="6" r="1.5"/><path d="M6.5 11c0-1.4 1.1-2.5 2.5-2.5s2.5 1.1 2.5 2.5"/></svg></div>
+        <div><div class="vs-t">Referências da comunidade</div><div class="vs-s">1 de 2 obtidas — toca para pedir</div></div>
+        <div class="vs-chk"><svg viewBox="0 0 9 9"><path d="M1.5 4.5l2 2 4-4" stroke="#fff" stroke-width="1.4" fill="none"/></svg></div>
+      </div>
+    </div>
+
+    <div class="slabel">Os meus talentos &amp; serviços</div>
+    <div class="skill-pills">
+      <span class="sp t">🎸 Aulas de guitarra</span>
+      <span class="sp t">🌙 Consultas de astrologia</span>
+      <span class="sp t">🕊️ Mediação CNV</span>
+      <span class="sp s">🛒 Ajuda com compras</span>
+      <span class="sp s">🔧 Pequenas reparações</span>
+    </div>
+
+    <div class="slabel">Publicar serviço ou talento</div>
+    <div class="pub-panel">
+      <div class="ptype-row">
+        <button class="ptbtn ss" id="pt-s" onclick="setPT('social')">Social</button>
+        <button class="ptbtn" id="pt-t" onclick="setPT('talent')">Talento</button>
+      </div>
+      <input class="pinput" id="pub-title" placeholder="Descreve o que oferes...">
+      <div class="prow">
+        <select id="pub-cat">
+          <option value="casa">Casa</option>
+          <option value="cuidado">Cuidado &amp; companhia</option>
+          <option value="aulas">Aulas</option>
+          <option value="tech">Tecnologia</option>
+          <option value="saude">Saúde &amp; bem-estar</option>
+          <option value="musica">Música</option>
+          <option value="outro">Outro</option>
+        </select>
+        <select id="pub-cost">
+          <option value="1">1 ✦ / hora</option>
+          <option value="2">2 ✦ / hora</option>
+        </select>
+      </div>
+      <div class="sens-toggle" onclick="togSens()">
+        <div class="tg" id="stg"><div class="tk"></div></div>
+        <span>Serviço sensível — requer ID verificado de ambas as partes</span>
+      </div>
+      <button class="pub-btn sb" id="pub-btn" onclick="doPublish()">Publicar serviço social</button>
+    </div>
+    <div style="height:30px"></div>
+  </div>
+
+  <!-- BOTTOM NAV -->
+  <div class="bottom-nav">
+    <div class="bn on" id="bn-explorar" onclick="showTab('explorar')">
+      <svg viewBox="0 0 22 22"><circle cx="11" cy="10" r="7"/><path d="M8 10h6M11 7v6" stroke-width="1.5"/></svg>
+      <span>Explorar</span>
+    </div>
+    <div class="bn" id="bn-pedir" onclick="showTab('pedir')">
+      <svg viewBox="0 0 22 22"><path d="M11 4v14M4 11h14" stroke-linecap="round"/></svg>
+      <span>Pedir ajuda</span>
+    </div>
+    <div class="bn" id="bn-mensagens" onclick="showTab('mensagens')">
+      <svg viewBox="0 0 22 22"><path d="M3 4h16a1 1 0 011 1v9a1 1 0 01-1 1H6l-4 3V5a1 1 0 011-1z"/></svg>
+      <span>Mensagens</span>
+      <div class="bn-dot" id="msg-dot"></div>
+    </div>
+    <div class="bn" id="bn-carteira" onclick="showTab('carteira')">
+      <svg viewBox="0 0 22 22"><rect x="2" y="5" width="18" height="14" rx="2"/><path d="M2 9h18"/><circle cx="16" cy="14" r="1.5" fill="currentColor" stroke="none"/></svg>
+      <span>Carteira</span>
+    </div>
+    <div class="bn" id="bn-perfil" onclick="showTab('perfil')">
+      <svg viewBox="0 0 22 22"><circle cx="11" cy="8" r="4"/><path d="M3 20c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg>
+      <span>Perfil</span>
+    </div>
+  </div>
+
+  <!-- DETAIL MODAL -->
+  <div class="modal-overlay" id="detail-modal" onclick="closeDetailOvl(event)">
+    <div class="modal">
+      <div class="drag"></div>
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:11px">
+        <div class="av v-ring" id="dm-av" style="width:46px;height:46px;font-size:15px;overflow:hidden"></div>
+        <div style="flex:1">
+          <div style="font-size:13px;font-weight:500;color:var(--t)" id="dm-prov"></div>
+          <div style="display:flex;align-items:center;gap:5px;margin-top:3px">
+            <div class="stars" id="dm-stars"></div>
+            <span class="rt" id="dm-rtxt"></span>
+          </div>
+          <div id="dm-vbadge" style="margin-top:4px"></div>
+        </div>
+      </div>
+      <div class="m-title" id="dm-title"></div>
+      <p class="m-sub" id="dm-desc"></p>
+      <div id="dm-sens-warn" class="sens-warn" style="display:none">
+        <svg viewBox="0 0 15 15" fill="none" stroke="#7A5A00" stroke-width="1.4"><circle cx="7.5" cy="7.5" r="6.5"/><path d="M7.5 5v3.5M7.5 10.5v.3"/></svg>
+        <p>Serviço sensível. Ambos precisam de ID verificado. Localização partilhada durante o serviço.</p>
+      </div>
+      <div class="m-cost"><span>Custo</span><strong id="dm-cost"></strong></div>
+      <p class="m-bal" id="dm-bal"></p>
+      <button class="mbtn green" id="dm-confirm" onclick="doBook()">Confirmar troca</button>
+      <button class="mbtn gray" onclick="closeDetail()">Cancelar</button>
+    </div>
+  </div>
+
+  <!-- RATE MODAL -->
+  <div class="modal-overlay" id="rate-modal">
+    <div class="modal">
+      <div class="drag"></div>
+      <div style="font-family:'Playfair Display',serif;font-size:18px;color:var(--t);margin-bottom:3px">Avaliar serviço</div>
+      <div style="font-size:12px;color:var(--t2)" id="rate-title"></div>
+      <div class="rate-stars-row" id="rate-stars"></div>
+      <textarea class="rate-area" id="rate-comment" placeholder="Comentário opcional..."></textarea>
+      <button class="mbtn green" onclick="submitRate()">Submeter avaliação</button>
+      <button class="mbtn gray" onclick="document.getElementById('rate-modal').classList.remove('on')">Agora não</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+</div>
+
+<script>
+var bal=8,selItem=null,pubType='social',sensOn=false,rateVal=0,activeMsgI=-1;
+
+// Avatar colors for fake users
+var USERS={
+  'Sara Mendes':     {bg:'#FFD6E0',c:'#6B0F2B',initials:'SM'},
+  'João Ferreira':   {bg:'#C9E4FF',c:'#0A2F5C',initials:'JF'},
+  'Lena Sousa':      {bg:'#D4F4DD',c:'#0A3D1E',initials:'LS'},
+  'Rui Baptista':    {bg:'#EDE0FF',c:'#2D0A5C',initials:'RB'},
+  'Marta Costa':     {bg:'#FFE8CC',c:'#5C2A00',initials:'MC'},
+  'Tomás Pinto':     {bg:'#C9FFF0',c:'#003D2E',initials:'TP'},
+  'Filipa Nunes':    {bg:'#FFDDE8',c:'#5C0A23',initials:'FN'},
+  'André Lima':      {bg:'#D6EAFF',c:'#0A2A4A',initials:'AL'},
+  'Beatriz Santos':  {bg:'#FFF0CC',c:'#5C3800',initials:'BS'},
+  'Carlos Vieira':   {bg:'#E0FFD6',c:'#1A3D0A',initials:'CV'},
+};
+
+function uStyle(name){return USERS[name]||{bg:'#EEE',c:'#333',initials:name.split(' ').map(function(w){return w[0]}).join('').slice(0,2)}}
+
+var listings=[
+  {id:1,title:'Aulas de guitarra — todos os níveis',provider:'Diogo Carvalho',rating:4.9,reviews:18,type:'talent',cat:'música',cost:1,desc:'Clássica, folk e fingerpicking. Do iniciante ao avançado. Aulas personalizadas na Mouraria.',sensitive:false,dist:'0m',verified:true},
+  {id:2,title:'Consultas de astrologia natal',provider:'Diogo Carvalho',rating:5.0,reviews:11,type:'talent',cat:'bem-estar',cost:1,desc:'Mapa natal completo com interpretação aprofundada. Presencial ou online.',sensitive:false,dist:'0m',verified:true},
+  {id:3,title:'Aulas de dança contemporânea',provider:'Sara Mendes',rating:4.8,reviews:22,type:'talent',cat:'dança',cost:1,desc:'Professora de dança com 10 anos de palco. Grupos pequenos ou individual. Estrela.',sensitive:false,dist:'420m',verified:true},
+  {id:4,title:'Facilitação de Biodanza',provider:'Lena Sousa',rating:5.0,reviews:9,type:'talent',cat:'bem-estar',cost:2,desc:'Sessões de Biodanza em grupo. Movimento, música e emoção para reconectar com o corpo.',sensitive:false,dist:'1.1km',verified:true},
+  {id:5,title:'Aulas de bateria — iniciantes',provider:'Rui Baptista',rating:4.7,reviews:14,type:'talent',cat:'música',cost:1,desc:'Baterista profissional com estúdio próprio. Ensino técnica, groove e leitura de partituras.',sensitive:false,dist:'800m',verified:true},
+  {id:6,title:'Terapia de som — Bol Tibetano',provider:'Marta Costa',rating:4.9,reviews:7,type:'talent',cat:'terapia',cost:2,desc:'Sessões individuais de sound healing. Redução de ansiedade e relaxamento profundo.',sensitive:true,dist:'650m',verified:true},
+  {id:7,title:'Passear o cão',provider:'Tomás Pinto',rating:4.8,reviews:31,type:'social',cat:'animais',cost:1,desc:'Passeios de 30-60 min na zona de Alfama/Mouraria. Tenho experiência com raças grandes.',sensitive:false,dist:'300m',verified:true},
+  {id:8,title:'Fazer um furo na parede',provider:'André Lima',rating:4.6,reviews:8,type:'social',cat:'casa',cost:1,desc:'Tenho berbequim e ferramentas. Quadros, prateleiras, TV na parede — trato de tudo.',sensitive:false,dist:'550m',verified:false},
+  {id:9,title:'Companhia a idosos — visitas',provider:'Filipa Nunes',rating:5.0,reviews:16,type:'social',cat:'cuidado',cost:1,desc:'Visito idosos em casa para conversa e companhia. Formação em cuidados básicos.',sensitive:true,dist:'900m',verified:true},
+  {id:10,title:'Mediação de conflitos (CNV)',provider:'Diogo Carvalho',rating:4.9,reviews:6,type:'talent',cat:'bem-estar',cost:1,desc:'Sessões de mediação inspiradas em Comunicação Não-Violenta. Relações, família, trabalho.',sensitive:false,dist:'0m',verified:true},
+  {id:11,title:'Babysitter — crianças 3-10 anos',provider:'Beatriz Santos',rating:4.9,reviews:20,type:'social',cat:'cuidado',cost:2,desc:'Educadora de infância. Referências disponíveis. Disponível fins de semana.',sensitive:true,dist:'1.3km',verified:true},
+  {id:12,title:'Explicações de matemática',provider:'João Ferreira',rating:4.8,reviews:25,type:'social',cat:'explicações',cost:1,desc:'Professor do ensino básico e secundário. Algébra, geometria e preparação para exames.',sensitive:false,dist:'700m',verified:true},
+  {id:13,title:'Ajudar a montar móveis IKEA',provider:'Carlos Vieira',rating:4.7,reviews:12,type:'social',cat:'casa',cost:1,desc:'Já montei tudo o que a IKEA faz. Rápido e sem estragos. Disponível aos fins de semana.',sensitive:false,dist:'480m',verified:true},
+];
+
+var helpRequests=[
+  {name:'João Ferreira',prev:'Preciso de ajuda para carregar compras pesadas do supermercado até casa (3º andar sem elevador). Sábado de manhã.',cat:'compras',offer:1,dist:'300m',time:'há 5 min'},
+  {name:'Beatriz Santos',prev:'Alguém pode ajudar-me a instalar um router novo? Não percebo nada de tecnologia e o técnico da NOS demora semanas.',cat:'tech',offer:1,dist:'900m',time:'há 20 min'},
+  {name:'Carlos Vieira',prev:'Preciso de regar plantas e dar comida ao gato durante uma semana em agosto. Pago 3 topia.',cat:'animais',offer:3,dist:'1.2km',time:'há 1h'},
+  {name:'Marta Costa',prev:'Alguém disponível para me dar boleia ao aeroporto amanhã às 7h da manhã?',cat:'transporte',offer:2,dist:'600m',time:'há 2h'},
+  {name:'Tomás Pinto',prev:'Procuro alguém que me ensine o básico de Photoshop, 2 sessões de 1h. Ofereço 2 topia por sessão.',cat:'tech',offer:2,dist:'450m',time:'há 3h'},
+];
+
+var msgs=[
+  {name:'Sara Mendes',prev:'Adorei a aula de guitarra! Posso marcar para a semana?',time:'11:23',unread:true,verified:true,
+   bubbles:[{me:false,txt:'Olá Diogo! Fiz a primeira aula ontem com outra pessoa mas adorei a tua abordagem.',t:'11:20'},{me:true,txt:'Que bom! Podemos combinar para quando quiseres.',t:'11:22'},{me:false,txt:'Adorei a aula! Posso marcar para a semana que vem?',t:'11:23'}]},
+  {name:'Lena Sousa',prev:'A sessão de Biodanza foi transformadora, obrigada!',time:'ontem',unread:false,verified:true,
+   bubbles:[{me:false,txt:'Diogo, a tua sessão de CNV ajudou-me imenso com a situação familiar.',t:'2ª'},{me:true,txt:'Fico muito contente, é um trabalho profundo. Quando quiseres continuamos.',t:'2ª'},{me:false,txt:'A sessão foi transformadora, obrigada!',t:'ontem'}]},
+  {name:'Rui Baptista',prev:'Queres trocar aulas? Tu guitarra eu bateria?',time:'há 2 dias',unread:true,verified:true,
+   bubbles:[{me:false,txt:'Vi que dás aulas de guitarra. Eu dou de bateria — queres fazer uma troca?',t:'Qui'},{me:true,txt:'Que ideia fixe! Uma hora de guitarra por uma de bateria, soa bem.',t:'Qui'},{me:false,txt:'Exacto! Quando tens disponibilidade?',t:'há 2 dias'}]},
+];
+
+var txns=[
+  {type:'cr',t:'Aulas de guitarra — Sara M.',s:'hoje, 11h00',a:'+1 ✦'},
+  {type:'cr',t:'Consulta astrologia — Beatriz S.',s:'ontem',a:'+1 ✦'},
+  {type:'db',t:'Passear o cão — Tomás P.',s:'há 3 dias',a:'-1 ✦'},
+  {type:'cr',t:'Mediação CNV — Carlos V.',s:'há 5 dias',a:'+1 ✦'},
+  {type:'cr',t:'Bónus de boas-vindas',s:'há 2 meses',a:'+5 ✦'},
+  {type:'db',t:'Aulas de bateria — Rui B.',s:'há 1 semana',a:'-1 ✦'},
+];
+
+function doLogin(){
+  document.getElementById('login-screen').classList.remove('on');
+  document.getElementById('main-screen').classList.add('on');
+  renderCards('all');renderHelp();renderMsgs();renderTx();
+  toast('Bem-vindo, Diogo! 📍 Mouraria, Lisboa');
+}
+
+function showTab(id){
+  var tabs=['explorar','pedir','mensagens','carteira','perfil'];
+  tabs.forEach(function(t){
+    var el=document.getElementById('tab-'+t);
+    if(el){el.style.display='none'}
+    var bn=document.getElementById('bn-'+t);
+    if(bn)bn.classList.remove('on');
+  });
+  var target=document.getElementById('tab-'+id);
+  if(target){
+    if(id==='mensagens'){target.style.display='flex';target.style.flexDirection='column';target.style.flex='1';target.style.overflow='hidden';}
+    else target.style.display='block';
+  }
+  var bn=document.getElementById('bn-'+id);
+  if(bn)bn.classList.add('on');
+  if(id==='carteira')renderTx();
+}
+
+function setChip(el,f){
+  document.querySelectorAll('.chip').forEach(function(c){c.classList.remove('on','s-on','t-on')});
+  if(f==='social')el.classList.add('s-on');
+  else if(f==='talent')el.classList.add('t-on');
+  else el.classList.add('on');
+  renderCards(f);
+}
+
+function avHTML(name,size,ring){
+  var u=uStyle(name);
+  return '<div class="av '+(ring?'v-ring':'nv-ring')+'" style="width:'+size+'px;height:'+size+'px;font-size:'+(size*0.3)+'px;background:'+u.bg+';color:'+u.c+'">'+u.initials+'</div>';
+}
+
+function stars(r,sz){
+  var h='';
+  for(var i=1;i<=5;i++){
+    h+='<div class="star"><svg viewBox="0 0 10 10" style="width:'+sz+'px;height:'+sz+'px"><path d="M5 1l1.5 3h3.5L7.5 6.5l1 3.5L5 8 1.5 10l1-3.5L0 4h3.5z" fill="'+(i<=Math.floor(r)?'#C49A2A':'#ddd')+'"/></svg></div>';
+  }
+  return h;
+}
+
+function renderCards(f){
+  var list=listings.slice();
+  if(f==='social')list=list.filter(function(l){return l.type==='social'});
+  else if(f==='talent')list=list.filter(function(l){return l.type==='talent'});
+  else if(f==='sensivel')list=list.filter(function(l){return l.sensitive});
+  else if(f==='perto')list.sort(function(a,b){return parseFloat(a.dist)-parseFloat(b.dist)});
+  var mine=list.filter(function(l){return l.provider==='Diogo Carvalho'});
+  var others=list.filter(function(l){return l.provider!=='Diogo Carvalho'});
+  list=mine.concat(others);
+
+  document.getElementById('cards-wrap').innerHTML=list.map(function(l){
+    var u=uStyle(l.provider);
+    var isMe=l.provider==='Diogo Carvalho';
+    var avStyle=isMe?'background:linear-gradient(135deg,#1a1a2e,#0f3460);color:#a89cff':'background:'+u.bg+';color:'+u.c;
+    var avInit=isMe?'DC':u.initials;
+    return '<div class="card" onclick="openDetail('+l.id+')">'+
+      '<div class="card-top">'+
+      '<div class="av '+(l.verified?'v-ring':'nv-ring')+'" style="width:42px;height:42px;font-size:13px;'+avStyle+'">'+avInit+'</div>'+
+      '<div class="card-body">'+
+      '<div class="c-title">'+l.title+'</div>'+
+      '<div class="c-who">'+l.provider+(isMe?' <span style="background:var(--brand-light);color:var(--brand-dark);font-size:10px;padding:1px 5px;border-radius:3px;border:0.5px solid var(--brand)">tu</span>':'')+
+      ' <span style="color:var(--t3)">·</span>'+
+      '<svg style="width:10px;height:10px" viewBox="0 0 10 10" fill="none" stroke="var(--t3)" stroke-width="1.2"><circle cx="5" cy="4" r="1.8"/><path d="M5 8S2 6 2 4a3 3 0 016 0c0 2-3 4-3 4z"/></svg>'+
+      '<span style="color:var(--t3)">'+l.dist+'</span></div>'+
+      '<div class="c-desc">'+l.desc+'</div>'+
+      '<div class="c-footer">'+
+      '<span class="type-tag '+(l.type==='social'?'ts':'tt')+'">'+(l.type==='social'?'Social':'Talento')+'</span>'+
+      '<span class="cat-tag">'+l.cat+'</span>'+
+      (l.sensitive?'<span class="sens-tag">🔒 sensível</span>':'')+
+      '<div class="price-right"><span class="pv">'+l.cost+' ✦</span><span class="pu"> topia</span></div>'+
+      '</div></div></div>'+
+      '<div class="card-bot">'+
+      '<div class="stars">'+stars(l.rating,10)+'</div>'+
+      '<span class="rt">'+l.rating.toFixed(1)+' ('+l.reviews+')</span>'+
+      '<span class="vbadge '+(l.verified?'ok':'no')+'">'+(l.verified?'✓ verificado':'sem verificação')+'</span>'+
+      '</div></div>';
+  }).join('');
+}
+
+function renderHelp(){
+  document.getElementById('help-list').innerHTML=helpRequests.map(function(h,i){
+    var u=uStyle(h.name);
+    return '<div class="help-card" onclick="openHelpChat('+i+')">'+
+      '<div class="help-card-top">'+
+      '<div class="av v-ring" style="width:40px;height:40px;font-size:13px;background:'+u.bg+';color:'+u.c+'">'+u.initials+'</div>'+
+      '<div style="flex:1">'+
+      '<div class="help-title">'+h.name+'</div>'+
+      '<div class="help-desc">'+h.prev+'</div>'+
+      '</div></div>'+
+      '<div class="help-footer">'+
+      '<span class="cat-tag">'+h.cat+'</span>'+
+      '<div class="help-offer"><span>✦ '+h.offer+' topia</span></div>'+
+      '<div class="help-loc"><svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="var(--t3)" stroke-width="1.2"><circle cx="5" cy="4" r="1.8"/><path d="M5 8S2 6 2 4a3 3 0 016 0c0 2-3 4-3 4z"/></svg>'+h.dist+'</div>'+
+      '<span style="font-size:10px;color:var(--t3);margin-left:auto">'+h.time+'</span>'+
+      '</div></div>';
+  }).join('');
+}
+
+function postRequest(){
+  var desc=document.getElementById('req-desc').value.trim();
+  if(!desc){toast('Descreve o que precisas de ajuda');return}
+  helpRequests.unshift({
+    name:'Diogo Carvalho',prev:desc,
+    cat:document.getElementById('req-cat').value,
+    offer:parseInt(document.getElementById('req-offer').value),
+    dist:'0m',time:'agora mesmo'
+  });
+  document.getElementById('req-desc').value='';
+  renderHelp();
+  toast('Pedido publicado na comunidade!');
+}
+
+function openHelpChat(i){
+  var h=helpRequests[i];
+  // Find or create message thread
+  var existing=msgs.findIndex(function(m){return m.name===h.name});
+  if(existing>=0){
+    showTab('mensagens');
+    openChat(existing);
+  } else {
+    msgs.unshift({name:h.name,prev:'Posso ajudar!',time:'agora',unread:false,verified:true,
+      bubbles:[{me:false,txt:h.prev,t:'agora'},{me:true,txt:'Olá! Vi o teu pedido, posso ajudar.',t:'agora'}]});
+    showTab('mensagens');
+    renderMsgs();
+    openChat(0);
+  }
+}
+
+function openDetail(id){
+  selItem=listings.find(function(x){return x.id===id});
+  var l=selItem;
+  var u=uStyle(l.provider);
+  var isMe=l.provider==='Diogo Carvalho';
+  var dav=document.getElementById('dm-av');
+  dav.textContent=isMe?'DC':u.initials;
+  dav.style.background=isMe?'linear-gradient(135deg,#1a1a2e,#0f3460)':u.bg;
+  dav.style.color=isMe?'#a89cff':u.c;
+  dav.style.width='46px';dav.style.height='46px';dav.style.fontSize='15px';
+  document.getElementById('dm-prov').textContent=l.provider+(isMe?' (tu)':'');
+  document.getElementById('dm-stars').innerHTML=stars(l.rating,12);
+  document.getElementById('dm-rtxt').textContent=l.rating.toFixed(1)+' · '+l.reviews+' avaliações';
+  document.getElementById('dm-vbadge').innerHTML='<span class="vbadge '+(l.verified?'ok':'no')+'">'+(l.verified?'✓ ID verificado':'sem verificação')+'</span>';
+  document.getElementById('dm-title').textContent=l.title;
+  document.getElementById('dm-desc').textContent=l.desc;
+  document.getElementById('dm-sens-warn').style.display=l.sensitive?'flex':'none';
+  document.getElementById('dm-cost').textContent=l.cost+' ✦ topia';
+  document.getElementById('dm-bal').textContent='Saldo: '+bal+' ✦ → ficará com '+(bal-l.cost)+' ✦';
+  var canBook=bal>=l.cost&&!isMe;
+  document.getElementById('dm-confirm').disabled=!canBook;
+  document.getElementById('dm-confirm').textContent=isMe?'É o teu próprio serviço':bal>=l.cost?'Confirmar troca':'Saldo insuficiente';
+  document.getElementById('detail-modal').classList.add('on');
+}
+
+function closeDetailOvl(e){if(e.target===document.getElementById('detail-modal'))closeDetail()}
+function closeDetail(){document.getElementById('detail-modal').classList.remove('on');selItem=null}
+
+function doBook(){
+  if(!selItem)return;
+  bal-=selItem.cost;updateBal();
+  txns.unshift({type:'db',t:selItem.title+' — '+selItem.provider,s:'agora mesmo',a:'-'+selItem.cost+' ✦'});
+  closeDetail();
+  document.getElementById('rate-title').textContent=selItem.title;
+  renderRateStars();
+  document.getElementById('rate-modal').classList.add('on');
+  toast('Troca confirmada! −'+selItem.cost+' ✦ topia');
+}
+
+function renderRateStars(){
+  rateVal=0;
+  var c=document.getElementById('rate-stars');c.innerHTML='';
+  for(var i=1;i<=5;i++){
+    (function(n){
+      var s=document.createElementNS('http://www.w3.org/2000/svg','svg');
+      s.setAttribute('viewBox','0 0 14 14');s.setAttribute('class','rstar');
+      s.innerHTML='<path d="M7 1.5l1.5 3.5 4 .5-3 2.8.7 4L7 10.5 3.8 12.3l.7-4-3-2.8 4-.5z"/>';
+      s.onclick=function(){rateVal=n;document.querySelectorAll('.rstar').forEach(function(x,i){x.classList.toggle('on',i<n)})};
+      c.appendChild(s);
+    })(i);
+  }
+}
+
+function submitRate(){
+  if(rateVal===0){toast('Seleciona uma avaliação');return}
+  document.getElementById('rate-modal').classList.remove('on');
+  document.getElementById('rate-comment').value='';
+  toast('Avaliação submetida. Obrigado!');
+}
+
+function renderMsgs(){
+  document.getElementById('msg-list').innerHTML=msgs.map(function(m,i){
+    var u=uStyle(m.name);
+    return '<div class="msg-item'+(m.unread?' unread':'')+'" onclick="openChat('+i+')">'+
+      '<div class="msg-hdr">'+
+      '<div class="av '+(m.verified?'v-ring':'nv-ring')+'" style="width:36px;height:36px;font-size:13px;background:'+u.bg+';color:'+u.c+'">'+u.initials+'</div>'+
+      '<div style="flex:1"><div class="msg-name">'+m.name+'</div></div>'+
+      '<div class="msg-time">'+m.time+'</div>'+
+      (m.unread?'<div class="udot"></div>':'')+
+      '</div>'+
+      '<div class="msg-prev">'+m.prev+'</div></div>';
+  }).join('');
+}
+
+function openChat(i){
+  activeMsgI=i;var m=msgs[i];m.unread=false;
+  document.getElementById('msg-dot').style.display=msgs.some(function(x){return x.unread})?'block':'none';
+  var u=uStyle(m.name);
+  var ca=document.getElementById('chat-av');
+  ca.textContent=u.initials;ca.style.background=u.bg;ca.style.color=u.c;
+  document.getElementById('chat-name').textContent=m.name;
+  document.getElementById('chat-status').textContent=m.verified?'✓ ID verificado · activo há pouco':'activo há pouco';
+  renderBubbles(m);
+  document.getElementById('msg-list-view').style.display='none';
+  document.getElementById('chat-view').style.display='flex';
+  document.getElementById('chat-view').style.flexDirection='column';
+  document.getElementById('chat-view').style.flex='1';
+  document.getElementById('chat-view').style.overflow='hidden';
+  renderMsgs();
+}
+
+function renderBubbles(m){
+  document.getElementById('chat-bubbles').innerHTML=m.bubbles.map(function(b){
+    return '<div><div class="bub '+(b.me?'me':'them')+'">'+b.txt+'</div>'+
+      '<div class="bub-t" style="text-align:'+(b.me?'right':'left')+'">'+b.t+'</div></div>';
+  }).join('');
+  var c=document.getElementById('chat-bubbles');c.scrollTop=c.scrollHeight;
+}
+
+function backMsgs(){
+  document.getElementById('chat-view').style.display='none';
+  document.getElementById('msg-list-view').style.display='block';
+}
+
+function sendMsg(){
+  var inp=document.getElementById('chat-inp');
+  var txt=inp.value.trim();
+  if(!txt||activeMsgI<0)return;
+  var m=msgs[activeMsgI];
+  m.bubbles.push({me:true,txt:txt,t:'agora'});m.prev=txt;
+  renderBubbles(m);inp.value='';
+  var replies=['Perfeito, combinado!','Óptimo, fico a aguardar.','Obrigado pela resposta!','Vamos combinar então.','Excelente! 🙏'];
+  setTimeout(function(){
+    var r=replies[Math.floor(Math.random()*replies.length)];
+    m.bubbles.push({me:false,txt:r,t:'agora'});m.prev=r;m.unread=true;
+    renderBubbles(m);renderMsgs();
+    document.getElementById('msg-dot').style.display='block';
+  },1200);
+}
+
+function renderTx(){
+  document.getElementById('tx-list').innerHTML=txns.map(function(tx){
+    var cr=tx.type==='cr';
+    return '<div class="tx">'+
+      '<div class="tx-ico" style="background:'+(cr?'#E0FAF3':'#FCEBEB')+'">'+
+      '<svg viewBox="0 0 14 14" fill="none" stroke="'+(cr?'#0A7A56':'#A32D2D')+'" stroke-width="1.5">'+
+      (cr?'<polyline points="3,9 7,4 11,9"/><line x1="7" y1="4" x2="7" y2="13"/>':'<polyline points="3,5 7,10 11,5"/><line x1="7" y1="10" x2="7" y2="1"/>')+
+      '</svg></div>'+
+      '<div class="txb"><div class="txt">'+tx.t+'</div><div class="txs">'+tx.s+'</div></div>'+
+      '<span class="txa '+(cr?'cr':'db')+'">'+tx.a+'</span></div>';
+  }).join('');
+}
+
+function updateBal(){
+  document.getElementById('bal-badge').textContent=bal;
+  document.getElementById('hero-bal').textContent=bal;
+  document.getElementById('wallet-big').textContent=bal;
+}
+
+function setPT(t){
+  pubType=t;
+  document.getElementById('pt-s').className='ptbtn'+(t==='social'?' ss':'');
+  document.getElementById('pt-t').className='ptbtn'+(t==='talent'?' ts':'');
+  document.getElementById('pub-btn').className='pub-btn '+(t==='social'?'sb':'tb');
+  document.getElementById('pub-btn').textContent='Publicar '+(t==='social'?'serviço social':'talento');
+}
+
+function togSens(){
+  sensOn=!sensOn;
+  document.getElementById('stg').classList.toggle('on',sensOn);
+}
+
+function doPublish(){
+  var title=document.getElementById('pub-title').value.trim();
+  if(!title){toast('Descreve o que oferes');return}
+  listings.unshift({id:Date.now(),title:title,provider:'Diogo Carvalho',rating:5.0,reviews:0,type:pubType,cat:document.getElementById('pub-cat').value,cost:parseInt(document.getElementById('pub-cost').value),desc:'Publicado por mim.',sensitive:sensOn,dist:'0m',verified:true});
+  bal+=1;updateBal();
+  txns.unshift({type:'cr',t:'Serviço publicado: '+title,s:'agora mesmo',a:'+1 ✦'});
+  document.getElementById('pub-title').value='';
+  renderCards('all');
+  toast('Publicado! +1 ✦ topia de boas-vindas');
+}
+
+function vstepTap(el){
+  if(!el.classList.contains('done')){
+    el.classList.add('done');
+    var ico=el.querySelector('.vs-ico');ico.style.background='var(--brand)';ico.style.borderColor='var(--brand)';
+    var svg=ico.querySelector('svg');if(svg)svg.setAttribute('stroke','#fff');
+    bal+=1;updateBal();
+    txns.unshift({type:'cr',t:'Verificação de identidade concluída',s:'agora mesmo',a:'+1 ✦'});
+    toast('Verificação concluída! +1 ✦ topia');
+  }
+}
+
+function handlePhoto(event){
+  var file=event.target.files[0];
+  if(!file)return;
+  var reader=new FileReader();
+  reader.onload=function(e){
+    var src=e.target.result;
+    // Update profile photo
+    var pp=document.getElementById('prof-photo-el');
+    pp.innerHTML='<img src="'+src+'" style="width:100%;height:100%;object-fit:cover;border-radius:50%">';
+    // Update hero photo
+    var hp=document.getElementById('hero-photo-el');
+    hp.innerHTML='<img src="'+src+'" style="width:100%;height:100%;object-fit:cover">';
+    toast('Foto de perfil actualizada!');
+  };
+  reader.readAsDataURL(file);
+}
+
+function toast(msg){
+  var t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('on');
+  setTimeout(function(){t.classList.remove('on')},2600);
+}
+</script>
+</body>
+</html>
